@@ -164,10 +164,15 @@ def parse_git_log(log_output: str, repo_name: str) -> Tuple[List[CommitInfo], Se
 def aggregate_stats(commits: List[CommitInfo], stats_dict: Dict[str, UserStats]):
     """Update user stats based on a list of new commits."""
     for commit in commits:
-        user_key = commit.email if commit.email else commit.author
+        user_key = commit.author.lower()
         
         if user_key not in stats_dict:
             stats_dict[user_key] = UserStats(author=commit.author, email=commit.email)
+        else:
+            if not stats_dict[user_key].email or '@' not in stats_dict[user_key].email:
+                if commit.email and '@' in commit.email:
+                    stats_dict[user_key].email = commit.email
+            
             
         stats = stats_dict[user_key]
         
