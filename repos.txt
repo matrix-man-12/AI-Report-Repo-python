@@ -1,1 +1,1 @@
-https://github.com/matrix-man-12/Marker
+https://github.com/kamranahmedse/git-standup
