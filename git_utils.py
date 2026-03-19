@@ -46,11 +46,17 @@ def sync_repo(repo_url: str, repos_dir: str) -> str:
         print(f"Fetching updates for {repo_name}...")
         run_git_command(["fetch", "--all"], cwd=repo_path)
     else:
-        print(f"Cloning {repo_name} (shallow, blob:none)...")
+        print(f"Cloning {repo_name}...")
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
+        
+        clone_args = ["git", "clone"]
+        if getattr(config, "GIT_FILTER_BLOB_NONE", False):
+            clone_args.append("--filter=blob:none")
+        clone_args.extend([repo_url, repo_path])
+
         subprocess.run(
-            ["git", "clone", repo_url, repo_path],
+            clone_args,
             check=True,
             env=env
         )
@@ -71,6 +77,9 @@ def get_commits_log(repo_path: str, since: Optional[str] = None, until: Optional
         "--date=iso-strict",
         f"--format={format_string}"
     ]
+
+    if getattr(config, "GIT_NO_RENAMES", False):
+        args.append("--no-renames")
 
     if since:
         args.append(f"--since={since}")

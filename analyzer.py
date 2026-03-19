@@ -26,7 +26,8 @@ def check_cache_validity(repo_name: str):
     current_meta = {
         "search_marker": config.SEARCH_MARKER,
         "since_date": config.SINCE_DATE,
-        "until_date": config.UNTIL_DATE
+        "until_date": config.UNTIL_DATE,
+        "no_renames": getattr(config, "GIT_NO_RENAMES", False)
     }
     
     shas_file = os.path.join(config.CACHE_DIR, f"{repo_name}_shas.json")
