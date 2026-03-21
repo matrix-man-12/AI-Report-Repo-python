@@ -1,9 +1,12 @@
 import os
 import csv
+import logging
 from datetime import datetime
 from typing import Dict
 import config
 from models import UserStats
+
+logger = logging.getLogger(__name__)
 
 def _get_global_stats(repo_stats_map: Dict[str, Dict[str, UserStats]]) -> Dict[str, UserStats]:
     global_stats: Dict[str, UserStats] = {}
@@ -61,10 +64,10 @@ def generate_csv_report(repo_stats_map: Dict[str, Dict[str, UserStats]]):
         writer = csv.writer(f)
         
         # Top level info
-        writer.writerow(["Date:", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        writer.writerow(["Range:", f"{since_str} to {until_str}"])
-        writer.writerow(["Branches:", branch_str])
         writer.writerow(["Search Text:", search_str])
+        writer.writerow(["Branches:", branch_str])
+        writer.writerow(["Date Range:", f"{since_str} to {until_str}"])
+        writer.writerow(["Generated At:", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
         writer.writerow([])
         
         # Per-repo stats
@@ -90,7 +93,7 @@ def generate_csv_report(repo_stats_map: Dict[str, Dict[str, UserStats]]):
             for stat in sorted_global:
                 writer.writerow(_build_row_stats(stat, report_columns))
 
-    print(f"CSV Report generated successfully: {report_file}")
+    logger.info(f"CSV Report generated successfully: {report_file}")
     return report_file
 
 def _build_terminal_headers(report_columns: dict) -> tuple:
@@ -135,33 +138,33 @@ def print_terminal_report(repo_stats_map: Dict[str, Dict[str, UserStats]]):
     since_str = config.SINCE_DATE if config.SINCE_DATE else "Beginning of time"
     until_str = config.UNTIL_DATE if config.UNTIL_DATE else "Now"
 
-    print("\n" + "="*total_width)
-    print(" AI CODE COVERAGE REPORT ".center(total_width, "="))
-    print("="*total_width)
-    print(f"Date:        {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"Range:       {since_str} to {until_str}")
-    print(f"Branches:    {branch_str}")
-    print(f"Search Text: {search_str}")
-    print("="*total_width)
+    logger.info("\n" + "="*total_width)
+    logger.info(" AI CODE COVERAGE REPORT ".center(total_width, "="))
+    logger.info("="*total_width)
+    logger.info(f"Search Text:  {search_str}")
+    logger.info(f"Branches:     {branch_str}")
+    logger.info(f"Date Range:   {since_str} to {until_str}")
+    logger.info(f"Generated At: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info("="*total_width)
 
     def print_stats(stats_dict):
-        print("-" * total_width)
-        print(header_str)
-        print("-" * total_width)
+        logger.info("-" * total_width)
+        logger.info(header_str)
+        logger.info("-" * total_width)
         sorted_stats = sorted(stats_dict.values(), key=lambda x: x.total_additions, reverse=True)
         for s in sorted_stats:
-            print(_build_terminal_row(s, report_columns, fmt))
-        print("-" * total_width)
+            logger.info(_build_terminal_row(s, report_columns, fmt))
+        logger.info("-" * total_width)
 
     for repo_name, stats_dict in repo_stats_map.items():
         if not stats_dict:
             continue
-        print(f"\n[ Repository: {repo_name} | Branch: {branch_str} ]")
+        logger.info(f"\n[ Repository: {repo_name} | Branch: {branch_str} ]")
         print_stats(stats_dict)
 
     global_stats = _get_global_stats(repo_stats_map)
     if global_stats:
-        print(f"\n[ Aggregated Repos | Branch: {branch_str} ]")
+        logger.info(f"\n[ Aggregated Repos | Branch: {branch_str} ]")
         print_stats(global_stats)
     
-    print("\n" + "="*total_width + "\n")
+    logger.info("\n" + "="*total_width + "\n")

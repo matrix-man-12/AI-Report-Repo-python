@@ -1,29 +1,33 @@
 import os
+import logging
 from typing import Dict
 import config
+import logger  # Initializes logging
 import git_utils
 import analyzer
 import report
 from models import UserStats
 
+logger_instance = logging.getLogger(__name__)
+
 def main():
-    print("Starting AI vs Human Code Contribution Analysis...")
+    logger_instance.info("Starting AI vs Human Code Contribution Analysis...")
     
     if not os.path.exists(config.REPOS_FILE):
-        print(f"Error: {config.REPOS_FILE} not found. Please create it and add repository URLs.")
+        logger_instance.error(f"Error: {config.REPOS_FILE} not found. Please create it and add repository URLs.")
         return
 
     with open(config.REPOS_FILE, 'r', encoding='utf-8') as f:
         repo_urls = [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
     if not repo_urls:
-        print("No repositories found in repos.txt. Exiting.")
+        logger_instance.warning("No repositories found in repos.txt. Exiting.")
         return
 
     repo_stats_map: Dict[str, Dict[str, UserStats]] = {}
 
     for url in repo_urls:
-        print(f"\nProcessing repository: {url}")
+        logger_instance.info(f"\nProcessing repository: {url}")
         
         try:
             repo_path = git_utils.sync_repo(url, config.REPOS_DIR)
@@ -34,13 +38,13 @@ def main():
             repo_stats = analyzer.load_cached_stats(repo_name)
             
             try:
-                print(f"Fetching logs for {repo_name}...")
+                logger_instance.info(f"Fetching logs for {repo_name}...")
                 log_output = git_utils.get_commits_log(repo_path, config.SINCE_DATE, config.UNTIL_DATE)
                 
-                print("Parsing and identifying AI contributions...")
+                logger_instance.info("Parsing and identifying AI contributions...")
                 commits, new_shas = analyzer.parse_git_log(log_output, repo_name)
                 
-                print(f"Found {len(new_shas)} new commits to process.")
+                logger_instance.info(f"Found {len(new_shas)} new commits to process.")
                 
                 if commits:
                     analyzer.aggregate_stats(commits, repo_stats)
@@ -48,22 +52,22 @@ def main():
             except Exception:
                 target = getattr(config, 'TARGET_BRANCH', None)
                 msg_branch = f" branch '{target}'" if target else ""
-                print(f"Warning: Could not fetch/parse logs for {repo_name}. Check if{msg_branch} actually exists.")
+                logger_instance.warning(f"Could not fetch/parse logs for {repo_name}. Check if{msg_branch} actually exists.")
             
             repo_stats_map[repo_name] = repo_stats
                 
         except Exception as e:
-            print(f"Critical error processing {url}: {e}")
+            logger_instance.error(f"Critical error processing {url}: {e}", exc_info=True)
 
     if repo_stats_map:
         if getattr(config, "OUTPUT_CSV", True):
-            print("\nGenerating final CSV report...")
+            logger_instance.info("\nGenerating final CSV report...")
             report.generate_csv_report(repo_stats_map)
         if getattr(config, "OUTPUT_TERMINAL", True):
-            print("\nGenerating terminal report...")
+            logger_instance.info("\nGenerating terminal report...")
             report.print_terminal_report(repo_stats_map)
     else:
-        print("\nNo stats to report. (No commits found or no repos processed properly).")
+        logger_instance.warning("\nNo stats to report. (No commits found or no repos processed properly).")
 
 if __name__ == "__main__":
     main()

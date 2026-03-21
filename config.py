@@ -7,6 +7,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPOS_DIR = os.path.join(BASE_DIR, "repos")
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 CACHE_DIR = os.path.join(BASE_DIR, ".cache")
+LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 # Files
 REPOS_FILE = os.path.join(BASE_DIR, "repos.txt")
@@ -32,7 +33,7 @@ GIT_FILTER_BLOB_NONE = True
 
 # Target branch to analyze. If None, analyzes all branches. 
 # Example: "main", "master", or 'origin/main'
-TARGET_BRANCH = 'master'
+TARGET_BRANCH = 'main'
 
 # Output controls
 OUTPUT_CSV = True

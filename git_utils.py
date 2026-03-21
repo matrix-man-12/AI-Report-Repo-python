@@ -1,7 +1,10 @@
 import os
 import subprocess
+import logging
 from typing import List, Optional
 import config
+
+logger = logging.getLogger(__name__)
 
 def run_git_command(args: List[str], cwd: str, check: bool = True) -> str:
     """Run a git command in the specified directory."""
@@ -22,14 +25,14 @@ def run_git_command(args: List[str], cwd: str, check: bool = True) -> str:
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"Error running git {' '.join(args)} in {cwd}:")
-        print(e.stderr)
+        logger.debug(f"Error running git {' '.join(args)} in {cwd}:")
+        logger.debug(e.stderr)
         raise
 
 def sync_repo(repo_url: str, repos_dir: str) -> str:
     """Clone or fetch a repository. Returns the path to the repository."""
     if repo_url.strip() == ".":
-        print("Using current directory as repository...")
+        logger.info("Using current directory as repository...")
         return os.getcwd()
 
     if not os.path.exists(repos_dir):
@@ -43,10 +46,10 @@ def sync_repo(repo_url: str, repos_dir: str) -> str:
     repo_path = os.path.join(repos_dir, repo_name)
 
     if os.path.exists(repo_path) and os.path.isdir(os.path.join(repo_path, '.git')):
-        print(f"Fetching updates for {repo_name}...")
+        logger.info(f"Fetching updates for {repo_name}...")
         run_git_command(["fetch", "--all"], cwd=repo_path)
     else:
-        print(f"Cloning {repo_name}...")
+        logger.info(f"Cloning {repo_name}...")
         env = os.environ.copy()
         env["GIT_TERMINAL_PROMPT"] = "0"
         
