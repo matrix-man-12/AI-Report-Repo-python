@@ -47,7 +47,10 @@ def sync_repo(repo_url: str, repos_dir: str) -> str:
 
     if os.path.exists(repo_path) and os.path.isdir(os.path.join(repo_path, '.git')):
         logger.info(f"Fetching updates for {repo_name}...")
-        run_git_command(["fetch", "--all"], cwd=repo_path)
+        try:
+            run_git_command(["fetch", "--all"], cwd=repo_path)
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"Warning: Could not fetch updates for {repo_name}. Proceeding with existing local data.")
     else:
         logger.info(f"Cloning {repo_name}...")
         env = os.environ.copy()
@@ -58,11 +61,18 @@ def sync_repo(repo_url: str, repos_dir: str) -> str:
             clone_args.append("--filter=blob:none")
         clone_args.extend([repo_url, repo_path])
 
-        subprocess.run(
-            clone_args,
-            check=True,
-            env=env
-        )
+        try:
+            subprocess.run(
+                clone_args,
+                check=True,
+                env=env,
+                capture_output=True,
+                text=True
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error cloning {repo_name}. Skipping repo. (Network/Auth redirect blocked git clone)")
+            logger.debug(e.stderr)
+            return None
 
     return repo_path
 

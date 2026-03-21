@@ -49,6 +49,10 @@ def main():
         
         try:
             repo_path = git_utils.sync_repo(url, config.REPOS_DIR)
+            if not repo_path:
+                logger_instance.warning(f"Skipping {url} as it could not be securely synchronized.\n")
+                continue
+                
             repo_name = os.path.basename(repo_path)
             
             # Invalidate cache if search marker or dates have changed
