@@ -25,9 +25,11 @@ def check_cache_validity(repo_name: str):
     meta_file = os.path.join(config.CACHE_DIR, f"{repo_name}_meta.json")
     current_meta = {
         "search_marker": config.SEARCH_MARKER,
+        "search_case_sensitive": getattr(config, "SEARCH_CASE_SENSITIVE", False),
         "since_date": config.SINCE_DATE,
         "until_date": config.UNTIL_DATE,
-        "no_renames": getattr(config, "GIT_NO_RENAMES", False)
+        "no_renames": getattr(config, "GIT_NO_RENAMES", False),
+        "target_branch": getattr(config, "TARGET_BRANCH", None)
     }
     
     shas_file = os.path.join(config.CACHE_DIR, f"{repo_name}_shas.json")
@@ -125,7 +127,10 @@ def parse_git_log(log_output: str, repo_name: str) -> Tuple[List[CommitInfo], Se
             timestamp = datetime.now()
 
         message = header_and_body[4].strip()
-        is_ai = config.SEARCH_MARKER.lower() in message.lower()
+        if getattr(config, "SEARCH_CASE_SENSITIVE", False):
+            is_ai = config.SEARCH_MARKER in message
+        else:
+            is_ai = config.SEARCH_MARKER.lower() in message.lower()
 
         additions = 0
         deletions = 0

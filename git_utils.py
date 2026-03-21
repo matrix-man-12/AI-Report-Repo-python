@@ -72,11 +72,16 @@ def get_commits_log(repo_path: str, since: Optional[str] = None, until: Optional
     
     args = [
         "log",
-        "--all",
         "--numstat",
         "--date=iso-strict",
         f"--format={format_string}"
     ]
+    
+    target_branch = getattr(config, "TARGET_BRANCH", None)
+    if target_branch:
+        args.append(target_branch)
+    else:
+        args.append("--all")
 
     if getattr(config, "GIT_NO_RENAMES", False):
         args.append("--no-renames")

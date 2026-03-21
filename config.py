@@ -12,7 +12,11 @@ CACHE_DIR = os.path.join(BASE_DIR, ".cache")
 REPOS_FILE = os.path.join(BASE_DIR, "repos.txt")
 
 # Commit matching config
-SEARCH_MARKER = "AI-Agent: ClineSR"
+SEARCH_MARKER = "added"
+
+# If True, the search marker must match exactly (e.g. "Fix" won't match "fix").
+# If False, the search is case-insensitive.
+SEARCH_CASE_SENSITIVE = False
 
 # Git options
 
@@ -25,6 +29,27 @@ GIT_NO_RENAMES = True
 # repository cloning and saves disk space by only downloading the commit history, not file contents.
 # If False, performs a standard full git clone.
 GIT_FILTER_BLOB_NONE = True
+
+# Target branch to analyze. If None, analyzes all branches. 
+# Example: "main", "master", or 'origin/main'
+TARGET_BRANCH = 'master'
+
+# Output controls
+OUTPUT_CSV = True
+OUTPUT_TERMINAL = True
+
+# Select which columns to include in the output reports.
+# "Author" and "Email" will always be included.
+REPORT_COLUMNS = {
+    "Total Commits": False,
+    "AI Commits": False,
+    "Total Additions": False,
+    "AI Additions": False,
+    "Total Deletions": False,
+    "AI Deletions": False,
+    "AI Code %": False,
+    "Aggregated AI Code %": True
+}
 
 # Date filters (Can be string in "YYYY-MM-DD" or None)
 SINCE_DATE = "2020-01-01"
