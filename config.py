@@ -41,6 +41,11 @@ GIT_NO_RENAMES = True
 # If False, performs a standard full git clone.
 GIT_FILTER_BLOB_NONE = True
 
+# If True, calculates changes made to the target branch exclusively.
+# It automatically filters out legacy commits from checkout branches 
+# and pulled commits from other branches.
+GIT_BRANCH_SPECIFIC_ONLY = True
+
 # Target branch to analyze. If None, analyzes all branches. 
 # Example: "main", "master", or 'origin/main'
 TARGET_BRANCH = 'main'
@@ -63,7 +68,7 @@ REPORT_COLUMNS = {
 }
 
 # Date filters (Can be string in "YYYY-MM-DD" or None)
-SINCE_DATE = "2026-01-01"
+SINCE_DATE = "2025-01-01"
 UNTIL_DATE = None
 
 # Custom git log format delimiter to easily parse

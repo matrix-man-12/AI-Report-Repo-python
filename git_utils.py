@@ -91,8 +91,25 @@ def get_commits_log(repo_path: str, since: Optional[str] = None, until: Optional
     ]
     
     target_branch = getattr(config, "TARGET_BRANCH", None)
+    branch_specific_only = getattr(config, "GIT_BRANCH_SPECIFIC_ONLY", False)
+
     if target_branch:
         args.append(target_branch)
+        if branch_specific_only and target_branch != "--all":
+            try:
+                refs_output = run_git_command(["for-each-ref", "--format=%(refname)", "refs/heads/", "refs/remotes/"], cwd=repo_path)
+                all_refs = [ref.strip() for ref in refs_output.splitlines() if ref.strip()]
+                
+                blocked_refs = [
+                    ref for ref in all_refs 
+                    if not ref.endswith(f"/{target_branch}") and ref != target_branch
+                ]
+                
+                if blocked_refs:
+                    args.append("--not")
+                    args.extend(blocked_refs)
+            except Exception as e:
+                logger.warning(f"Warning: Could not fetch refs for branch exclusion. Proceeding without strict branch filtering. {e}")
     else:
         args.append("--all")
 
