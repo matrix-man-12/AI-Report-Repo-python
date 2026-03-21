@@ -24,7 +24,9 @@ def _get_global_stats(repo_stats_map: Dict[str, Dict[str, UserStats]]) -> Dict[s
     return global_stats
 
 def _build_csv_headers(report_columns: dict) -> list:
-    headers = ["Author", "Email"]
+    headers = ["Author"]
+    if not getattr(config, "USE_ALIASES", False):
+        headers.append("Email")
     if report_columns.get("Total Commits", True): headers.append("Total Commits")
     if report_columns.get("AI Commits", True): headers.append("AI Commits")
     if report_columns.get("Total Additions", True): headers.append("Total Additions")
@@ -36,7 +38,9 @@ def _build_csv_headers(report_columns: dict) -> list:
     return headers
 
 def _build_row_stats(stat: UserStats, report_columns: dict) -> list:
-    row = [stat.author, stat.email]
+    row = [stat.author]
+    if not getattr(config, "USE_ALIASES", False):
+        row.append(stat.email)
     if report_columns.get("Total Commits", True): row.append(stat.total_commits)
     if report_columns.get("AI Commits", True): row.append(stat.ai_commits)
     if report_columns.get("Total Additions", True): row.append(stat.total_additions)
@@ -97,7 +101,9 @@ def generate_csv_report(repo_stats_map: Dict[str, Dict[str, UserStats]]):
     return report_file
 
 def _build_terminal_headers(report_columns: dict) -> tuple:
-    cols = [("Author", 15), ("Email", 12)]
+    cols = [("Author", 17)]
+    if not getattr(config, "USE_ALIASES", False):
+        cols.append(("Email", 12))
     if report_columns.get("Total Commits", True): cols.append(("Cmt", 5))
     if report_columns.get("AI Commits", True): cols.append(("AI_C", 4))
     if report_columns.get("Total Additions", True): cols.append(("Add", 7))
@@ -114,10 +120,13 @@ def _build_terminal_headers(report_columns: dict) -> tuple:
     return fmt, header_str, total_width
 
 def _build_terminal_row(stat: UserStats, report_columns: dict, fmt: str) -> str:
-    email_short = (stat.email[:9] + "...") if stat.email and len(stat.email) > 12 else stat.email
-    author_short = (stat.author[:12] + "...") if stat.author and len(stat.author) > 15 else stat.author
+    author_short = (stat.author[:14] + "...") if stat.author and len(stat.author) > 17 else stat.author
     
-    vals = [author_short or "", email_short or ""]
+    vals = [author_short or ""]
+    if not getattr(config, "USE_ALIASES", False):
+        email_short = (stat.email[:9] + "...") if stat.email and len(stat.email) > 12 else stat.email
+        vals.append(email_short or "")
+        
     if report_columns.get("Total Commits", True): vals.append(stat.total_commits)
     if report_columns.get("AI Commits", True): vals.append(stat.ai_commits)
     if report_columns.get("Total Additions", True): vals.append(stat.total_additions)

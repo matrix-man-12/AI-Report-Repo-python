@@ -8,9 +8,15 @@ REPOS_DIR = os.path.join(BASE_DIR, "repos")
 OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 CACHE_DIR = os.path.join(BASE_DIR, ".cache")
 LOG_DIR = os.path.join(BASE_DIR, "logs")
+ALIASES_DIR = os.path.join(BASE_DIR, "aliases")
 
 # Files
 REPOS_FILE = os.path.join(BASE_DIR, "repos.txt")
+ALIASES_FILE = os.path.join(ALIASES_DIR, "my_aliases.json")
+
+# Identity Resolution Configuration
+# Set to True to enable explicit fuzzy identity merging using ALIASES_FILE.
+USE_ALIASES = True
 
 # Commit matching config
 SEARCH_MARKER = "added"

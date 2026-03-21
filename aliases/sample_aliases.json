@@ -1,0 +1,17 @@
+{
+  "John Doe": [
+    "johndoe-99",
+    "John Doe/Engineering/AcmeCorp",
+    "john.doe@acmecorp.com"
+  ],
+  "Jane Smith": [
+    "jsmith-dev",
+    "jane.smith@acmecorp.com",
+    "Jane Smith/Frontend/AcmeCorp"
+  ],
+  "Alice Wonderland": [
+    "alice@wonderland.com",
+    "alice.w@wonderland.com",
+    "Alice Wonderland/Design/AcmeCorp"
+  ]
+}

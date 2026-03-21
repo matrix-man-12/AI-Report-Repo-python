@@ -8,6 +8,8 @@ __pycache__/
 output/
 repos/
 logs/
+aliases/*
+!aliases/sample_aliases.json
 
 # Environments
 .env

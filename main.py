@@ -24,6 +24,24 @@ def main():
         logger_instance.warning("No repositories found in repos.txt. Exiting.")
         return
 
+    alias_map = None
+    if getattr(config, "USE_ALIASES", False) and getattr(config, "ALIASES_FILE", None):
+        if os.path.exists(config.ALIASES_FILE):
+            try:
+                import json
+                with open(config.ALIASES_FILE, 'r', encoding='utf-8') as f:
+                    raw_aliases = json.load(f)
+                alias_map = {}
+                for primary_name, fragments in raw_aliases.items():
+                    for frag in fragments:
+                        if isinstance(frag, str):
+                            alias_map[frag] = primary_name
+                logger_instance.info(f"Loaded {len(alias_map)} identity aliases from {config.ALIASES_FILE}")
+            except Exception as e:
+                logger_instance.error(f"Failed to load ALIASES_FILE: {e}")
+        else:
+            logger_instance.warning(f"USE_ALIASES is True but {config.ALIASES_FILE} was not found.")
+
     repo_stats_map: Dict[str, Dict[str, UserStats]] = {}
 
     for url in repo_urls:
@@ -47,7 +65,7 @@ def main():
                 logger_instance.info(f"Found {len(new_shas)} new commits to process.")
                 
                 if commits:
-                    analyzer.aggregate_stats(commits, repo_stats)
+                    analyzer.aggregate_stats(commits, repo_stats, alias_map=alias_map)
                     analyzer.save_cached_stats(repo_name, repo_stats)
             except Exception:
                 target = getattr(config, 'TARGET_BRANCH', None)

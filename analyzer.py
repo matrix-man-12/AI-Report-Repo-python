@@ -23,13 +23,20 @@ def check_cache_validity(repo_name: str):
     """Check if config changed. If so, clear cache for this repo."""
     os.makedirs(config.CACHE_DIR, exist_ok=True)
     meta_file = os.path.join(config.CACHE_DIR, f"{repo_name}_meta.json")
+    
+    alias_mtime = 0
+    if getattr(config, "USE_ALIASES", False) and os.path.exists(getattr(config, "ALIASES_FILE", "")):
+        alias_mtime = os.path.getmtime(config.ALIASES_FILE)
+
     current_meta = {
         "search_marker": config.SEARCH_MARKER,
         "search_case_sensitive": getattr(config, "SEARCH_CASE_SENSITIVE", False),
         "since_date": config.SINCE_DATE,
         "until_date": config.UNTIL_DATE,
         "no_renames": getattr(config, "GIT_NO_RENAMES", False),
-        "target_branch": getattr(config, "TARGET_BRANCH", None)
+        "target_branch": getattr(config, "TARGET_BRANCH", None),
+        "use_aliases": getattr(config, "USE_ALIASES", False),
+        "alias_mtime": alias_mtime
     }
     
     shas_file = os.path.join(config.CACHE_DIR, f"{repo_name}_shas.json")
@@ -167,13 +174,22 @@ def parse_git_log(log_output: str, repo_name: str) -> Tuple[List[CommitInfo], Se
 
     return commits, new_shas
 
-def aggregate_stats(commits: List[CommitInfo], stats_dict: Dict[str, UserStats]):
+def aggregate_stats(commits: List[CommitInfo], stats_dict: Dict[str, UserStats], alias_map: Dict[str, str] = None):
     """Update user stats based on a list of new commits."""
     for commit in commits:
-        user_key = commit.author.lower()
+        author_val = commit.author
+        
+        # Apply strict fuzzy aliases if map is provided
+        if alias_map:
+            if commit.author in alias_map:
+                author_val = alias_map[commit.author]
+            elif commit.email in alias_map:
+                author_val = alias_map[commit.email]
+
+        user_key = author_val.lower()
         
         if user_key not in stats_dict:
-            stats_dict[user_key] = UserStats(author=commit.author, email=commit.email)
+            stats_dict[user_key] = UserStats(author=author_val, email=commit.email)
         else:
             if not stats_dict[user_key].email or '@' not in stats_dict[user_key].email:
                 if commit.email and '@' in commit.email:
