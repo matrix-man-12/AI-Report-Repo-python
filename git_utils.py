@@ -97,4 +97,15 @@ def get_commits_log(repo_path: str, since: Optional[str] = None, until: Optional
     if until:
         args.append(f"--until={until}")
 
-    return run_git_command(args, cwd=repo_path)
+    try:
+        return run_git_command(args, cwd=repo_path)
+    except subprocess.CalledProcessError as original_error:
+        # If a branch like 'feature-xyz' fails because it isn't tracked locally,
+        # automatically fallback to checking 'origin/feature-xyz' which is fetched in sync_repo.
+        if target_branch and not target_branch.startswith("origin/") and target_branch != "--all":
+            try:
+                args[args.index(target_branch)] = f"origin/{target_branch}"
+                return run_git_command(args, cwd=repo_path)
+            except subprocess.CalledProcessError:
+                pass
+        raise original_error
