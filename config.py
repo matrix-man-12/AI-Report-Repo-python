@@ -59,7 +59,7 @@ REPORT_COLUMNS = {
     "Total Deletions": True,
     "AI Deletions": True,
     "AI Code %": True,
-    "Aggregated AI Code %": True
+    "Aggregated AI Code %": False
 }
 
 # Date filters (Can be string in "YYYY-MM-DD" or None)
