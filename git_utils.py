@@ -89,6 +89,9 @@ def get_commits_log(repo_path: str, since: Optional[str] = None, until: Optional
     if getattr(config, "GIT_NO_RENAMES", False):
         args.append("--no-renames")
 
+    if getattr(config, "GIT_NO_MERGES", False):
+        args.append("--no-merges")
+
     if since:
         args.append(f"--since={since}")
     if until:

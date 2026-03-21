@@ -16,7 +16,7 @@ ALIASES_FILE = os.path.join(ALIASES_DIR, "my_aliases.json")
 
 # Identity Resolution Configuration
 # Set to True to enable explicit fuzzy identity merging using ALIASES_FILE.
-USE_ALIASES = True
+USE_ALIASES = False
 
 # Commit matching config
 SEARCH_MARKER = "added"
@@ -26,6 +26,10 @@ SEARCH_MARKER = "added"
 SEARCH_CASE_SENSITIVE = False
 
 # Git options
+
+# If True, completely filters out merge commits (e.g. PR approvals or developer git pulls) from the log.
+# This prevents commit counts from artificially inflating when no actual code was written.
+GIT_NO_MERGES = True
 
 # If True, treats file renames as a full deletion of the old file and full addition of the new file.
 # This makes the addition/deletion counts match GitHub Insights exactly.
@@ -48,18 +52,18 @@ OUTPUT_TERMINAL = True
 # Select which columns to include in the output reports.
 # "Author" and "Email" will always be included.
 REPORT_COLUMNS = {
-    "Total Commits": False,
-    "AI Commits": False,
-    "Total Additions": False,
-    "AI Additions": False,
-    "Total Deletions": False,
-    "AI Deletions": False,
-    "AI Code %": False,
+    "Total Commits": True,
+    "AI Commits": True,
+    "Total Additions": True,
+    "AI Additions": True,
+    "Total Deletions": True,
+    "AI Deletions": True,
+    "AI Code %": True,
     "Aggregated AI Code %": True
 }
 
 # Date filters (Can be string in "YYYY-MM-DD" or None)
-SINCE_DATE = "2020-01-01"
+SINCE_DATE = "2026-01-01"
 UNTIL_DATE = None
 
 # Custom git log format delimiter to easily parse

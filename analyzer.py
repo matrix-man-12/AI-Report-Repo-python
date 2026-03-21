@@ -34,6 +34,7 @@ def check_cache_validity(repo_name: str):
         "since_date": config.SINCE_DATE,
         "until_date": config.UNTIL_DATE,
         "no_renames": getattr(config, "GIT_NO_RENAMES", False),
+        "no_merges": getattr(config, "GIT_NO_MERGES", False),
         "target_branch": getattr(config, "TARGET_BRANCH", None),
         "use_aliases": getattr(config, "USE_ALIASES", False),
         "alias_mtime": alias_mtime
